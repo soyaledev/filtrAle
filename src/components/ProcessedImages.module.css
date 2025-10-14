@@ -1,10 +1,14 @@
 .processedImages {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background: var(--dark);
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 4px 20px var(--shadow);
   border: 1px solid rgba(255, 255, 255, 0.05);
   animation: fadeIn 0.6s ease-out;
+  overflow: hidden;
 }
 
 .imagesHeader {
@@ -55,7 +59,30 @@
 .imagesGrid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-auto-rows: 1fr;
+  width: 100%;
+}
+
+/* Desktop optimization */
+@media (min-width: 1024px) {
+  .imagesGrid {
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .processedImages {
+    padding: 2rem;
+  }
+
+  .imagesHeader h3 {
+    font-size: 1.5rem;
+  }
+
+  .downloadAllBtn {
+    padding: 0.875rem 2rem;
+    font-size: 1.1rem;
+  }
 }
 
 .imageItem {
@@ -63,11 +90,14 @@
   flex-direction: column;
   align-items: center;
   animation: fadeIn 0.6s ease-out;
+  width: 100%;
 }
 
 .imageContainer {
   position: relative;
   width: 100%;
+  height: 0;
+  padding-bottom: 100%;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 15px var(--shadow);
@@ -81,8 +111,11 @@
 }
 
 .processedImage {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 200px;
+  height: 100%;
   object-fit: cover;
   display: block;
   transition: transform 0.3s ease;
@@ -105,6 +138,53 @@
 
 .imageContainer:hover .imageOverlay {
   opacity: 1;
+}
+
+/* Loading overlay para imágenes en procesamiento */
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.loadingOverlay p {
+  color: var(--white);
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 0;
+  animation: pulse 2s infinite;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .downloadBtn {
@@ -149,61 +229,167 @@
 /* Responsive Design */
 @media (max-width: 480px) {
   .processedImages {
-    padding: 1.5rem;
-    margin: 0 0.5rem;
+    padding: 1.25rem;
+    margin: 0;
+    border-radius: 12px;
   }
-  
+
   .imagesHeader {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
-    gap: 1rem;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
   }
-  
+
   .imagesHeader h3 {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
   }
-  
+
   .downloadAllBtn {
     width: 100%;
     justify-content: center;
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    border-radius: 10px;
   }
-  
+
   .imagesGrid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1rem;
   }
-  
-  .processedImage {
-    height: 150px;
+
+  .imageItem {
+    margin-bottom: 0.5rem;
+  }
+
+  .imageContainer {
+    border-radius: 10px;
+    padding-bottom: 100%;
   }
   
   .downloadBtn {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    border-radius: 25px;
+  }
+
+  .imageName {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .loadingOverlay {
+    border-radius: 10px;
+  }
+
+  .loadingOverlay p {
+    font-size: 0.9rem;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+}
+
+/* Optimización para móviles muy pequeños */
+@media (max-width: 380px) {
+  .processedImages {
+    padding: 1rem;
+  }
+
+  .imagesHeader {
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .imagesHeader h3 {
     font-size: 1rem;
+  }
+
+  .downloadAllBtn {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .imagesGrid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .imageItem {
+    margin-bottom: 0.25rem;
+  }
+
+  .imageContainer {
+    padding-bottom: 100%;
+  }
+
+  .downloadBtn {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .imageName {
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+  }
+
+  .loadingOverlay p {
+    font-size: 0.85rem;
+  }
+
+  .spinner {
+    width: 35px;
+    height: 35px;
   }
 }
 
 @media (min-width: 481px) and (max-width: 767px) {
-  .imagesGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+  .processedImages {
+    padding: 1.25rem;
+    border-radius: 12px;
   }
-  
-  .processedImage {
-    height: 180px;
+
+  .imagesGrid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .imageContainer {
+    border-radius: 10px;
+    padding-bottom: 100%;
+  }
+
+  .downloadBtn {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.85rem;
+  }
+
+  .imageName {
+    font-size: 0.85rem;
+  }
+
+  .loadingOverlay p {
+    font-size: 0.9rem;
+  }
+
+  .spinner {
+    width: 45px;
+    height: 45px;
   }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .imagesGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1.5rem;
   }
-  
-  .processedImage {
-    height: 200px;
+
+  .imageContainer {
+    padding-bottom: 100%;
   }
 }
 
@@ -211,18 +397,18 @@
   .processedImages {
     padding: 2.5rem;
   }
-  
+
   .imagesHeader h3 {
     font-size: 1.75rem;
   }
-  
+
   .imagesGrid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 2rem;
   }
-  
-  .processedImage {
-    height: 220px;
+
+  .imageContainer {
+    padding-bottom: 100%;
   }
   
   .downloadBtn {
@@ -248,13 +434,12 @@
 }
 
 /* Estados de carga */
-.imageItem.loading {
-  opacity: 0.7;
-  pointer-events: none;
+.imageItem.processing {
+  opacity: 1;
 }
 
-.imageItem.loading .imageContainer {
-  animation: pulse 1.5s infinite;
+.imageItem.processing .imageContainer {
+  position: relative;
 }
 
 /* Animaciones */
@@ -281,6 +466,172 @@
 /* Utilidades */
 .fade-in {
   animation: fadeIn 0.6s ease-out;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  background: var(--dark);
+  border-radius: 16px;
+  max-width: 90vw;
+  max-height: 90vh;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.modalImageContainer {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--darker);
+}
+
+.modalImage {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modalActions {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  background: var(--dark);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modalDownloadBtn {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  font-size: 1rem;
+}
+
+.modalDownloadBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+  .modalContent {
+    max-width: 95vw;
+    max-height: 95vh;
+    margin: 10px;
+  }
+
+  .modalImageContainer {
+    padding: 15px;
+  }
+
+  .modalImage {
+    max-height: 60vh;
+  }
+
+  .modalActions {
+    padding: 15px;
+  }
+
+  .modalDownloadBtn {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+  }
+
+  .closeBtn {
+    top: 10px;
+    right: 15px;
+    width: 35px;
+    height: 35px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .modalImageContainer {
+    padding: 10px;
+  }
+
+  .modalImage {
+    max-height: 50vh;
+  }
+
+  .modalActions {
+    padding: 12px;
+  }
+
+  .modalDownloadBtn {
+    width: 100%;
+    padding: 14px 20px;
+  }
 }
 
 .stagger-animation {

@@ -1,0 +1,309 @@
+.previewSection {
+  animation: fadeIn 0.6s ease-out;
+  margin-bottom: 2rem;
+}
+
+.previewCard {
+  background: var(--dark);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.previewCard:hover {
+  box-shadow: 0 6px 25px var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.previewHeader h3 {
+  color: var(--white);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.previewBadge {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.previewContent {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--gray);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.previewImageWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.previewImageWrapper:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.previewImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 400px;
+  object-fit: contain;
+}
+
+.previewOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.previewImageWrapper:hover .previewOverlay {
+  opacity: 1;
+}
+
+.previewLabel {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--gray);
+  padding: 3rem 1rem;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .previewSection {
+    margin-bottom: 1rem;
+  }
+
+  .previewCard {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .previewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+  
+  .previewHeader h3 {
+    font-size: 1rem;
+  }
+  
+  .previewBadge {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+  }
+  
+  .previewContent {
+    min-height: 120px;
+  }
+
+  .previewImageWrapper {
+    border-radius: 10px;
+  }
+  
+  .previewImage {
+    max-height: 250px;
+    border-radius: 10px;
+  }
+
+  .loadingState {
+    gap: 0.75rem;
+  }
+
+  .loadingState p {
+    font-size: 0.9rem;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+
+  .emptyState {
+    padding: 2rem 1rem;
+  }
+
+  .emptyState p {
+    font-size: 0.9rem;
+  }
+
+  .previewLabel {
+    font-size: 0.85rem;
+  }
+
+  .previewOverlay {
+    padding: 0.75rem;
+  }
+}
+
+/* Optimización para móviles muy pequeños */
+@media (max-width: 380px) {
+  .previewSection {
+    margin-bottom: 0.75rem;
+  }
+
+  .previewCard {
+    padding: 0.75rem;
+  }
+
+  .previewHeader {
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .previewHeader h3 {
+    font-size: 0.95rem;
+  }
+
+  .previewBadge {
+    font-size: 0.6rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .previewContent {
+    min-height: 100px;
+  }
+
+  .previewImage {
+    max-height: 200px;
+  }
+
+  .loadingState {
+    gap: 0.5rem;
+  }
+
+  .loadingState p {
+    font-size: 0.85rem;
+  }
+
+  .spinner {
+    width: 35px;
+    height: 35px;
+  }
+
+  .emptyState {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .emptyState p {
+    font-size: 0.85rem;
+  }
+
+  .previewLabel {
+    font-size: 0.8rem;
+  }
+
+  .previewOverlay {
+    padding: 0.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .previewCard {
+    padding: 2.5rem;
+  }
+  
+  .previewHeader h3 {
+    font-size: 1.5rem;
+  }
+  
+  .previewImage {
+    max-height: 500px;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

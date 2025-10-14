@@ -1,76 +1,62 @@
 import { useState, useEffect } from 'react'
 import { applyGradientEffect } from '../utils/imageEffects'
-import styles from './ImageProcessor.module.css'
 
-const ImageProcessor = ({ images, gradientIntensity, onImageProcessed }) => {
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [processedCount, setProcessedCount] = useState(0)
+const ImageProcessor = ({ images, gradientIntensity, gradientColor, logoPosition, onImageProcessed, onProcessingStart }) => {
   const [processedImageIds] = useState(new Set())
 
   useEffect(() => {
-    // Solo procesar si hay imágenes y no está procesando actualmente
-    if (images.length > 0 && !isProcessing) {
-      setIsProcessing(true)
-      setProcessedCount(0)
+    // Solo procesar si hay imágenes
+    if (images.length > 0) {
       processedImageIds.clear()
 
       const processImages = async () => {
+        // Convertir color hex a RGB
+        const rgb = hexToRgb(gradientColor)
+        
         for (let i = 0; i < images.length; i++) {
           const image = images[i]
           
-          // Evitar procesar la misma imagen con la misma intensidad
-          const imageKey = `${image.id}-${gradientIntensity}`
+          // Evitar procesar la misma imagen con los mismos parámetros
+          const imageKey = `${image.id}-${gradientIntensity}-${gradientColor}-${logoPosition}`
           if (processedImageIds.has(imageKey)) {
             continue
           }
 
           try {
-            const processedImageData = await applyGradientEffect(image.file, gradientIntensity)
+            // Notificar que se está procesando
+            if (onProcessingStart) {
+              onProcessingStart(image.id)
+            }
+
+            const processedImageData = await applyGradientEffect(
+              image.file, 
+              gradientIntensity, 
+              rgb,
+              logoPosition
+            )
             onImageProcessed(image, processedImageData)
             processedImageIds.add(imageKey)
-            setProcessedCount(prev => prev + 1)
-            
-            // Pequeña pausa para mostrar el progreso
-            await new Promise(resolve => setTimeout(resolve, 200))
           } catch (error) {
             console.error('Error procesando imagen:', error)
           }
         }
-        
-        // Procesamiento completado
-        setIsProcessing(false)
       }
 
       processImages()
     }
-  }, [images, gradientIntensity, onImageProcessed]) // Removido isProcessing de las dependencias
+  }, [images, gradientIntensity, gradientColor, logoPosition, onImageProcessed, onProcessingStart])
 
-  // No mostrar nada si no hay procesamiento
-  if (!isProcessing) {
-    return null
+  const hexToRgb = (hex) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 0, g: 0, b: 0 }
   }
 
-  return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
-        <div className={styles.imageProcessor}>
-          <div className={styles.processingStatus}>
-            <h3>
-              {processedCount === 0 
-                ? 'Procesando...' 
-                : `${processedCount} imagen(es) procesada(s)`
-              }
-            </h3>
-            <div className={styles.progressBar}>
-              <div 
-                className={`${styles.progressFill} ${isProcessing ? styles.processing : styles.completed}`}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+  // No renderizar nada, el procesamiento es silencioso
+  return null
 }
 
 export default ImageProcessor 

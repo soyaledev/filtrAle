@@ -1,22 +1,37 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import ImageUploader from './components/ImageUploader'
 import ImageProcessor from './components/ImageProcessor'
 import ProcessedImages from './components/ProcessedImages'
+import { cleanupImageUrl } from './utils/imageEffects'
 import './App.css'
 
 function App() {
   const [images, setImages] = useState([])
   const [processedImages, setProcessedImages] = useState([])
-  const [gradientIntensity, setGradientIntensity] = useState(0.7)
+  const [gradientIntensity, setGradientIntensity] = useState(0.5)
+  const [gradientColor, setGradientColor] = useState('#000000')
+  const [logoPosition, setLogoPosition] = useState('bottom')
   const [isDownloading, setIsDownloading] = useState(false)
+  const [processingImages, setProcessingImages] = useState(new Set())
 
-  const handleImagesUpload = (uploadedImages) => {
-    setImages(uploadedImages)
-    setProcessedImages([])
-  }
+  const handleImagesUpload = useCallback((uploadedImages) => {
+    // Agregar las nuevas imágenes a las existentes
+    setImages(prevImages => [...prevImages, ...uploadedImages])
+    setProcessingImages(new Set())
+  }, [])
 
-  const handleImageProcessed = (originalImage, processedImageData) => {
+  const handleProcessingStart = useCallback((imageId) => {
+    setProcessingImages(prev => new Set(prev).add(imageId))
+  }, [])
+
+  const handleImageProcessed = useCallback((originalImage, processedImageData) => {
     setProcessedImages(prev => {
+      // Limpiar URL anterior si existe
+      const existingItem = prev.find(item => item.original.id === originalImage.id)
+      if (existingItem) {
+        cleanupImageUrl(existingItem.processed)
+      }
+      
       // Evitar duplicados basados en el ID de la imagen original
       const exists = prev.some(item => item.original.id === originalImage.id)
       if (exists) {
@@ -31,7 +46,14 @@ function App() {
         return [...prev, { original: originalImage, processed: processedImageData }]
       }
     })
-  }
+    
+    // Remover de procesamiento
+    setProcessingImages(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(originalImage.id)
+      return newSet
+    })
+  }, [])
 
   const handleDownloadAll = async () => {
     setIsDownloading(true)
@@ -56,9 +78,21 @@ function App() {
           await new Promise(resolve => setTimeout(resolve, 500))
         }
       }
+    } catch (error) {
+      console.error('Error descargando imágenes:', error)
+      alert('Error al descargar las imágenes. Por favor, intenta de nuevo.')
     } finally {
       setIsDownloading(false)
     }
+  }
+
+  const handleClearAll = () => {
+    // Limpiar todas las URLs
+    processedImages.forEach(item => {
+      cleanupImageUrl(item.processed)
+    })
+    setImages([])
+    setProcessedImages([])
   }
 
   return (
@@ -76,49 +110,103 @@ function App() {
       </header>
 
       <main className="app-main">
-        <section className="upload-section">
-          <ImageUploader 
-            onImagesUpload={handleImagesUpload}
-            maxFiles={10}
-          />
-        </section>
+        <div className="desktop-layout">
+          <div className="main-content">
+            <section className="upload-section">
+              <ImageUploader
+                onImagesUpload={handleImagesUpload}
+                maxFiles={10}
+              />
+            </section>
 
-        {images.length > 0 && (
-          <section className="controls-section">
-            <div className="controls">
-              <div className="intensity-control">
-                <label htmlFor="intensity">Intensidad del degradado:</label>
-                <input
-                  id="intensity"
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={gradientIntensity}
-                  onChange={(e) => setGradientIntensity(parseFloat(e.target.value))}
+            {processedImages.length > 0 && (
+              <section className="results-section">
+                <ProcessedImages
+                  processedImages={processedImages}
+                  onDownloadAll={handleDownloadAll}
+                  isDownloading={isDownloading}
+                  processingImages={processingImages}
                 />
-                <span>{Math.round(gradientIntensity * 100)}%</span>
-              </div>
-            </div>
-          </section>
-        )}
+              </section>
+            )}
+          </div>
 
-        {processedImages.length > 0 && (
-          <section className="results-section">
-            <ProcessedImages
-              processedImages={processedImages}
-              onDownloadAll={handleDownloadAll}
-              isDownloading={isDownloading}
-            />
-          </section>
-        )}
+          {images.length > 0 && (
+            <aside className="controls-sidebar">
+              <div className="controls">
+                <h3 className="controls-title">Personalización</h3>
+
+                <div className="intensity-control">
+                  <label htmlFor="intensity">Intensidad del degradado:</label>
+                  <input
+                    id="intensity"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={gradientIntensity}
+                    onChange={(e) => setGradientIntensity(parseFloat(e.target.value))}
+                    aria-label={`Intensidad del degradado: ${Math.round(gradientIntensity * 100)}%`}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow={Math.round(gradientIntensity * 100)}
+                  />
+                  <span role="status" aria-live="polite">{Math.round(gradientIntensity * 100)}%</span>
+                </div>
+
+                <div className="color-control">
+                  <label htmlFor="gradientColor">Color del degradado:</label>
+                  <div className="color-input-wrapper">
+                    <input
+                      id="gradientColor"
+                      type="color"
+                      value={gradientColor}
+                      onChange={(e) => setGradientColor(e.target.value)}
+                      className="color-picker"
+                      aria-label={`Color del degradado: ${gradientColor}`}
+                    />
+                    <span className="color-label" role="status" aria-live="polite">{gradientColor}</span>
+                  </div>
+                </div>
+
+                <div className="logo-position-control">
+                  <label htmlFor="logoPosition">Posición de los logos:</label>
+                  <select
+                    id="logoPosition"
+                    value={logoPosition}
+                    onChange={(e) => setLogoPosition(e.target.value)}
+                    className="logo-select"
+                    aria-label="Posición de los logos en la imagen"
+                  >
+                    <option value="bottom">Abajo</option>
+                    <option value="top">Arriba</option>
+                    <option value="middle">Centro</option>
+                  </select>
+                </div>
+
+                <div className="actions-buttons">
+                  <button
+                    className="clear-btn"
+                    onClick={handleClearAll}
+                    title="Limpiar todas las imágenes"
+                  >
+                    Limpiar Todo
+                  </button>
+                </div>
+              </div>
+            </aside>
+          )}
+        </div>
       </main>
 
       {/* Modal de procesamiento - fuera del main para que aparezca sobre todo */}
       <ImageProcessor
         images={images}
         gradientIntensity={gradientIntensity}
+        gradientColor={gradientColor}
+        logoPosition={logoPosition}
         onImageProcessed={handleImageProcessed}
+        onProcessingStart={handleProcessingStart}
       />
 
       <footer className="app-footer">
