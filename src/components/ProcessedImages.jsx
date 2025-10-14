@@ -178,7 +178,6 @@ const ProcessedImages = ({ processedImages, processingImages }) => {
         }
       }
       
-      alert(`${processedImages.length} imagen(es) procesada(s). Revise su carpeta de descargas.`)
     } catch (error) {
       console.error('Error descargando imágenes:', error)
       alert('Error al descargar las imágenes. Intente descargarlas individualmente.')
