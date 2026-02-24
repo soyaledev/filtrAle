@@ -1,62 +1,69 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { applyGradientEffect } from '../utils/imageEffects'
 
-const ImageProcessor = ({ images, gradientIntensity, gradientColor, logoPosition, onImageProcessed, onProcessingStart }) => {
-  const [processedImageIds] = useState(new Set())
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : { r: 0, g: 0, b: 0 }
+}
+
+const ImageProcessor = ({
+  images,
+  gradientIntensity,
+  gradientColor,
+  logoPosition,
+  onImageProcessed,
+  onProcessingStart,
+}) => {
+  const processedKeysRef = useRef(new Set())
 
   useEffect(() => {
-    // Solo procesar si hay imágenes
-    if (images.length > 0) {
-      processedImageIds.clear()
+    if (images.length === 0) return
 
-      const processImages = async () => {
-        // Convertir color hex a RGB
-        const rgb = hexToRgb(gradientColor)
-        
-        for (let i = 0; i < images.length; i++) {
-          const image = images[i]
-          
-          // Evitar procesar la misma imagen con los mismos parámetros
-          const imageKey = `${image.id}-${gradientIntensity}-${gradientColor}-${logoPosition}`
-          if (processedImageIds.has(imageKey)) {
-            continue
-          }
+    processedKeysRef.current = new Set()
 
-          try {
-            // Notificar que se está procesando
-            if (onProcessingStart) {
-              onProcessingStart(image.id)
-            }
+    const processImages = async () => {
+      const rgb = hexToRgb(gradientColor)
 
-            const processedImageData = await applyGradientEffect(
-              image.file, 
-              gradientIntensity, 
-              rgb,
-              logoPosition
-            )
-            onImageProcessed(image, processedImageData)
-            processedImageIds.add(imageKey)
-          } catch (error) {
-            console.error('Error procesando imagen:', error)
-          }
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i]
+        const imageKey = `${image.id}-${gradientIntensity}-${gradientColor}-${logoPosition}`
+
+        if (processedKeysRef.current.has(imageKey)) continue
+
+        try {
+          onProcessingStart?.(image.id)
+
+          const processedImageData = await applyGradientEffect(
+            image.file,
+            gradientIntensity,
+            rgb,
+            logoPosition
+          )
+          onImageProcessed(image, processedImageData)
+          processedKeysRef.current.add(imageKey)
+        } catch (error) {
+          console.error('Error procesando imagen:', error)
         }
       }
-
-      processImages()
     }
-  }, [images, gradientIntensity, gradientColor, logoPosition, onImageProcessed, onProcessingStart])
 
-  const hexToRgb = (hex) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : { r: 0, g: 0, b: 0 }
-  }
+    processImages()
+  }, [
+    images,
+    gradientIntensity,
+    gradientColor,
+    logoPosition,
+    onImageProcessed,
+    onProcessingStart,
+  ])
 
-  // No renderizar nada, el procesamiento es silencioso
   return null
 }
 
-export default ImageProcessor 
+export default ImageProcessor

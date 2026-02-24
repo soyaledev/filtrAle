@@ -2,68 +2,73 @@ import { useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import styles from './ImageUploader.module.css'
 
-const ImageUploader = ({ onImagesUpload, maxFiles = 10 }) => {
+const ImageUploader = ({ onImagesUpload, maxFiles = 10, onNotify }) => {
   const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
-    // Manejar archivos rechazados
-    if (rejectedFiles && rejectedFiles.length > 0) {
-      const reasons = rejectedFiles.map(f => f.errors.map(e => e.message).join(', ')).join('; ')
-      alert(`Algunos archivos no pudieron ser cargados:\n${reasons}`)
+    if (rejectedFiles?.length > 0) {
+      const reasons = rejectedFiles
+        .map((f) => f.errors.map((e) => e.message).join(', '))
+        .join('; ')
+      const msg = `Algunos archivos no pudieron cargarse: ${reasons}`
+      onNotify ? onNotify(msg, 'error') : alert(msg)
     }
 
-    const imageFiles = acceptedFiles.filter(file => 
-      file.type.startsWith('image/') && 
-      (file.type === 'image/jpeg' || file.type === 'image/png')
+    const imageFiles = acceptedFiles.filter(
+      (file) =>
+        file.type.startsWith('image/') &&
+        (file.type === 'image/jpeg' || file.type === 'image/png')
     )
 
     if (imageFiles.length === 0) {
-      alert('Por favor, sube solo archivos JPG o PNG')
+      const msg = 'Sube solo archivos JPG o PNG'
+      onNotify ? onNotify(msg, 'error') : alert(msg)
       return
     }
 
     if (imageFiles.length > maxFiles) {
-      alert(`Puedes subir máximo ${maxFiles} imágenes. Has seleccionado ${imageFiles.length}`)
+      const msg = `Máximo ${maxFiles} imágenes. Seleccionaste ${imageFiles.length}`
+      onNotify ? onNotify(msg, 'error') : alert(msg)
       return
     }
 
-    const imageObjects = imageFiles.map(file => ({
+    const imageObjects = imageFiles.map((file) => ({
       file,
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).slice(2, 11),
       name: file.name,
       size: file.size,
-      type: file.type
+      type: file.type,
     }))
 
     onImagesUpload(imageObjects)
-  }, [onImagesUpload, maxFiles])
+  }, [onImagesUpload, maxFiles, onNotify])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png']
+      'image/png': ['.png'],
     },
-    multiple: true
+    multiple: true,
   })
 
   return (
     <div className={styles.imageUploader}>
-      <div 
-        {...getRootProps()} 
+      <div
+        {...getRootProps()}
         className={`${styles.dropzone} ${isDragActive ? styles.active : ''}`}
-        role="button"
-        tabIndex={0}
-        aria-label="Área de carga de imágenes"
+        aria-label="Área de carga de imágenes. Arrastra o haz clic para seleccionar"
       >
         <input {...getInputProps()} aria-label="Selector de archivos de imagen" />
         <div className={styles.uploadContent}>
-          <div className={styles.uploadIcon} aria-hidden="true">+</div>
+          <span className={styles.uploadIcon} aria-hidden="true">
+            +
+          </span>
           {isDragActive ? (
-            <p>Suelta las imágenes aquí...</p>
+            <p>Suelta las imágenes aquí…</p>
           ) : (
             <>
-              <p>Arrastra y suelta imágenes aquí, o haz clic para seleccionar</p>
+              <p>Arrastra y suelta imágenes aquí o haz clic para seleccionar</p>
               <p className={styles.uploadHint}>
-                Formatos: JPG, PNG | Máximo: {maxFiles} imágenes
+                JPG, PNG · Máx. {maxFiles} imágenes
               </p>
             </>
           )}
@@ -73,4 +78,4 @@ const ImageUploader = ({ onImagesUpload, maxFiles = 10 }) => {
   )
 }
 
-export default ImageUploader 
+export default ImageUploader
